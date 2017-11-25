@@ -13,7 +13,7 @@ import scipy.optimize as so
 
 from .tools import (_greater_or_close, _less_or_close, broadcast_indices, find_intersections,
                     get_layer, interp)
-from ..constants import Cp_d, epsilon, kappa, Lv, P0, Rd
+from ..constants import Cp_d, Cp_v, Cp_l, epsilon, kappa, Lv, P0, Rd, Rv
 from ..package_tools import Exporter
 from ..units import atleast_1d, check_units, concatenate, units
 
@@ -392,6 +392,131 @@ def saturation_vapor_pressure(temperature):
     Instead of temperature, dewpoint may be used in order to calculate
     the actual (ambient) water vapor (partial) pressure.
 
+    The formula used is that from [Koutsoyiannis2012]_ for T in degrees Celsius:
+
+    .. math:: 6.112 e^\frac{17.67T}{T + 243.5}
+
+    """
+    # Converted from original in terms of C to use kelvin. Using raw absolute values of C in
+    # a formula plays havoc with units support.
+    #######
+    # This version uses MetPy constants with the Koutsoyiannis2012 formula
+    sat_pressure = 6.11657 * units.hPa
+    T0 = 273.16 * units.kelvin
+    alpha = (Lv + (Cp_l - Cp_v) * T0) / (Rv * T0)
+    c = (Cp_l - Cp_v) / Rv
+    return sat_pressure * np.exp(alpha * (1 - (T0 / temperature))) * (T0 / temperature) ** (c)
+
+
+@exporter.export
+@check_units('[temperature]')
+def saturation_vapor_pressure_lv(temperature):
+    r"""Calculate the saturation water vapor (partial) pressure.
+
+    Parameters
+    ----------
+    temperature : `pint.Quantity`
+        The temperature
+
+    Returns
+    -------
+    `pint.Quantity`
+        The saturation water vapor (partial) pressure
+
+    See Also
+    --------
+    vapor_pressure, dewpoint
+
+    Notes
+    -----
+    Instead of temperature, dewpoint may be used in order to calculate
+    the actual (ambient) water vapor (partial) pressure.
+
+    The formula used is that from [Koutsoyiannis2012]_ for T in degrees Celsius:
+
+    .. math:: 6.112 e^\frac{17.67T}{T + 243.5}
+
+    """
+    # Converted from original in terms of C to use kelvin. Using raw absolute values of C in
+    # a formula plays havoc with units support.
+
+    ###################
+    # This is the same as above, but incorporates a variable Lv
+    sat_pressure = 6.11657 * units.hPa
+    T0 = 273.16 * units.kelvin
+    alpha = Lv + (Cp_l - Cp_v) * T0
+    L = alpha - (Cp_l - Cp_v) * temperature.to('kelvin')
+    alpha_Rd = (L + (Cp_l - Cp_v) * T0) / (Rv * T0)
+    c = (Cp_l - Cp_v) / Rv
+    return (sat_pressure * np.exp(alpha_Rd * (1 - (T0 / temperature))) *
+            (T0 / temperature) ** c)
+
+
+@exporter.export
+@check_units('[temperature]')
+def saturation_vapor_pressure_Koutsoyiannis(temperature):
+    r"""Calculate the saturation water vapor (partial) pressure.
+
+    Parameters
+    ----------
+    temperature : `pint.Quantity`
+        The temperature
+
+    Returns
+    -------
+    `pint.Quantity`
+        The saturation water vapor (partial) pressure
+
+    See Also
+    --------
+    vapor_pressure, dewpoint
+
+    Notes
+    -----
+    Instead of temperature, dewpoint may be used in order to calculate
+    the actual (ambient) water vapor (partial) pressure.
+
+    The formula used is that from [Koutsoyiannis2012]_ for T in degrees Celsius:
+
+    .. math:: 6.112 e^\frac{17.67T}{T + 243.5}
+
+    """
+    # Converted from original in terms of C to use kelvin. Using raw absolute values of C in
+    # a formula plays havoc with units support.
+
+    ###################
+    # This is the formulation exactly as in the paper
+    sat_pressure = 6.11657 * units.hPa
+    T0 = 273.16 * units.kelvin
+    alpha = 24.921
+    c = 5.06
+    return sat_pressure * np.exp(alpha * (1 - (T0 / temperature))) * (T0 / temperature) ** (c)
+
+
+@exporter.export
+@check_units('[temperature]')
+def saturation_vapor_pressure_metpy_orig(temperature):
+    r"""Calculate the saturation water vapor (partial) pressure.
+
+    Parameters
+    ----------
+    temperature : `pint.Quantity`
+        The temperature
+
+    Returns
+    -------
+    `pint.Quantity`
+        The saturation water vapor (partial) pressure
+
+    See Also
+    --------
+    vapor_pressure, dewpoint
+
+    Notes
+    -----
+    Instead of temperature, dewpoint may be used in order to calculate
+    the actual (ambient) water vapor (partial) pressure.
+
     The formula used is that from [Bolton1980]_ for T in degrees Celsius:
 
     .. math:: 6.112 e^\frac{17.67T}{T + 243.5}
@@ -399,6 +524,7 @@ def saturation_vapor_pressure(temperature):
     """
     # Converted from original in terms of C to use kelvin. Using raw absolute values of C in
     # a formula plays havoc with units support.
+    # Original implementation
     return sat_pressure_0c * np.exp(17.67 * (temperature - 273.15 * units.kelvin) /
                                     (temperature - 29.65 * units.kelvin))
 
