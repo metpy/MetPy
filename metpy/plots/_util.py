@@ -12,9 +12,13 @@ from matplotlib.pyplot import imread
 import numpy as np
 import pkg_resources
 
+from ..package_tools import Exporter
 from ..units import concatenate
 
+exporter = Exporter(globals())
 
+
+@exporter.export
 def add_timestamp(ax, time=None, x=0.99, y=-0.04, ha='right', high_contrast=False,
                   pretext='Created: ', time_format='%Y-%m-%dT%H:%M:%SZ', **kwargs):
     """Add a timestamp to a plot.
@@ -100,6 +104,7 @@ def _add_logo(fig, x=10, y=25, zorder=100, which='metpy', size='small', **kwargs
     return fig.figimage(logo, x, y, zorder=zorder, **kwargs)
 
 
+@exporter.export
 def add_metpy_logo(fig, x=10, y=25, zorder=100, size='small', **kwargs):
     """Add the MetPy logo to a figure.
 
@@ -128,6 +133,7 @@ def add_metpy_logo(fig, x=10, y=25, zorder=100, size='small', **kwargs):
     return _add_logo(fig, x=x, y=y, zorder=zorder, which='metpy', size=size, **kwargs)
 
 
+@exporter.export
 def add_unidata_logo(fig, x=10, y=25, zorder=100, size='small', **kwargs):
     """Add the Unidata logo to a figure.
 
@@ -203,6 +209,7 @@ def colored_line(x, y, c, **kwargs):
     return lc
 
 
+@exporter.export
 def convert_gempak_color(c, style='psc'):
     """Convert GEMPAK color numbers into corresponding Matplotlib colors.
 
