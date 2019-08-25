@@ -10,6 +10,9 @@ or remote files (using :func:`~python:urllib.request.urlopen`).
 
 from .gini import *  # noqa: F403
 from .nexrad import *  # noqa: F403
+from ..package_tools import set_module
 
 __all__ = gini.__all__[:]  # pylint: disable=undefined-variable
 __all__.extend(nexrad.__all__)  # pylint: disable=undefined-variable
+
+set_module(globals())
