@@ -10,6 +10,8 @@ import warnings
 import numpy as np
 import scipy.integrate as si
 import scipy.optimize as so
+import logging
+import functools
 
 from .tools import (_greater_or_close, _less_or_close, find_bounding_indices,
                     find_intersections, first_derivative, get_layer)
@@ -20,11 +22,15 @@ from ..interpolate.one_dimension import interpolate_1d
 from ..package_tools import Exporter
 from ..units import atleast_1d, check_units, concatenate, units
 from ..xarray import preprocess_xarray
+#from numba import jit
+
+USE_NO_UNITS = False
 
 exporter = Exporter(globals())
 
 sat_pressure_0c = 6.112 * units.millibar
 
+sat_pressure_0c_no_units = 6.112*100 # Pa
 
 @exporter.export
 @preprocess_xarray
@@ -215,6 +221,30 @@ def dry_lapse(pressure, temperature, ref_pressure=None):
     return temperature * (pressure / ref_pressure)**mpconsts.kappa
 
 
+def dt_units(t, p):
+    t = units.Quantity(t, units.kelvin)
+    p = units.Quantity(p, units.hectopascal)
+    rs = saturation_mixing_ratio(p, t)
+
+    # print("Rd = {}, Lv = {}, Cp_d = {}".format(mpconsts.Rd,mpconsts.Lv, mpconsts.Cp_d))
+
+    frac = ((mpconsts.Rd * t + mpconsts.Lv * rs)
+            / (mpconsts.Cp_d + (mpconsts.Lv * mpconsts.Lv * rs * mpconsts.epsilon
+                                / (mpconsts.Rd * t * t)))).to('kelvin')
+    # print("rs = {}, frac/p = {}".format(rs, frac/p))
+    return frac / p
+
+#@jit(nopython=True)
+def dt_no_units(t, p):
+    p = p * 100 # Pa
+    rs = saturation_mixing_ratio_no_units(p, t)
+
+    frac = ((mpconsts.Rd_no_units * t + mpconsts.Lv_no_units * rs)
+            / (mpconsts.Cp_d_no_units + (mpconsts.Lv_no_units * mpconsts.Lv_no_units * rs * mpconsts.epsilon_no_units
+                                / (mpconsts.Rd_no_units * t * t))))
+    # print("rs = {}, frac/p = {}".format(rs, frac/p))
+    return frac / p * 100 # K/hPa
+
 @exporter.export
 @preprocess_xarray
 @check_units('[pressure]', '[temperature]', '[pressure]')
@@ -257,14 +287,6 @@ def moist_lapse(pressure, temperature, ref_pressure=None):
     This equation comes from [Bakhshaii2013]_.
 
     """
-    def dt(t, p):
-        t = units.Quantity(t, temperature.units)
-        p = units.Quantity(p, pressure.units)
-        rs = saturation_mixing_ratio(p, t)
-        frac = ((mpconsts.Rd * t + mpconsts.Lv * rs)
-                / (mpconsts.Cp_d + (mpconsts.Lv * mpconsts.Lv * rs * mpconsts.epsilon
-                                    / (mpconsts.Rd * t * t)))).to('kelvin')
-        return frac / p
 
     if ref_pressure is None:
         ref_pressure = pressure[0]
@@ -285,6 +307,11 @@ def moist_lapse(pressure, temperature, ref_pressure=None):
 
     ret_temperatures = np.empty((0, temperature.shape[0]))
 
+    if USE_NO_UNITS:
+        dt = dt_no_units
+    else:
+        dt = dt_units
+
     if ref_pressure > pressure.min():
         # Integrate downward in pressure
         pres_down = np.append(ref_pressure, pressure[(ref_pres_idx - 1)::-1])
@@ -302,10 +329,20 @@ def moist_lapse(pressure, temperature, ref_pressure=None):
 
     return units.Quantity(ret_temperatures.T.squeeze(), temperature.units)
 
+def memoize(func):
+    cache = func.cache = {}
+    @functools.wraps(func)
+    def memoized_func(*args, **kwargs):
+        key = str(args) + str(kwargs)
+        if key not in cache:
+            cache[key] = func(*args, **kwargs)
+        return cache[key]
+    return memoized_func
 
 @exporter.export
 @preprocess_xarray
 @check_units('[pressure]', '[temperature]', '[temperature]')
+@memoize
 def lcl(pressure, temperature, dewpt, max_iters=50, eps=1e-5):
     r"""Calculate the lifted condensation level (LCL) using from the starting point.
 
@@ -351,13 +388,25 @@ def lcl(pressure, temperature, dewpt, max_iters=50, eps=1e-5):
     The function is guaranteed to finish by virtue of the `max_iters` counter.
 
     """
-    def _lcl_iter(p, p0, w, t):
+    def _lcl_iter_units(p, p0, w, t):
         td = dewpoint(vapor_pressure(units.Quantity(p, pressure.units), w))
         return (p0 * (td / t) ** (1. / mpconsts.kappa)).m
 
+    def _lcl_iter_no_units(p, p0, w, t):
+        td = dewpoint_no_units(vapor_pressure_no_units(p, w))
+        return (p0 * (td / t) ** (1. / mpconsts.kappa_no_units))
+
+    _lcl_iter = _lcl_iter_no_units if USE_NO_UNITS else _lcl_iter_units
+
     w = mixing_ratio(saturation_vapor_pressure(dewpt), pressure)
-    fp = so.fixed_point(_lcl_iter, pressure.m, args=(pressure.m, w, temperature),
-                        xtol=eps, maxiter=max_iters)
+
+    if USE_NO_UNITS:
+        fp = so.fixed_point(_lcl_iter, pressure.m*100, args=(pressure.m*100, w.m, temperature.m),
+                            xtol=eps, maxiter=max_iters)/100
+    else:
+        fp = so.fixed_point(_lcl_iter, pressure.m, args=(pressure.m, w, temperature),
+                            xtol=eps, maxiter=max_iters)
+
     lcl_p = fp * pressure.units
     return lcl_p, dewpoint(vapor_pressure(lcl_p, w))
 
@@ -690,6 +739,12 @@ def vapor_pressure(pressure, mixing):
 
 @exporter.export
 @preprocess_xarray
+def vapor_pressure_no_units(pressure, mixing):
+    return pressure * mixing / (mpconsts.epsilon_no_units + mixing)
+
+
+@exporter.export
+@preprocess_xarray
 @check_units('[temperature]')
 def saturation_vapor_pressure(temperature):
     r"""Calculate the saturation water vapor (partial) pressure.
@@ -722,6 +777,11 @@ def saturation_vapor_pressure(temperature):
     # a formula plays havoc with units support.
     return sat_pressure_0c * np.exp(17.67 * (temperature - 273.15 * units.kelvin)
                                     / (temperature - 29.65 * units.kelvin))
+
+#@jit(nopython=True)
+def saturation_vapor_pressure_no_units(temperature):
+    return sat_pressure_0c_no_units * np.exp(17.67 * (temperature - 273.15)
+                                    / (temperature - 29.65))
 
 
 @exporter.export
@@ -784,6 +844,12 @@ def dewpoint(e):
     val = np.log(e / sat_pressure_0c)
     return 0. * units.degC + 243.5 * units.delta_degC * val / (17.67 - val)
 
+@exporter.export
+@preprocess_xarray
+def dewpoint_no_units(e):
+    val = np.log(e / sat_pressure_0c_no_units)
+    return mpconsts.zero_degC + 243.5 * val / (17.67 - val)
+
 
 @exporter.export
 @preprocess_xarray
@@ -826,6 +892,11 @@ def mixing_ratio(part_press, tot_press, molecular_weight_ratio=mpconsts.epsilon)
     return (molecular_weight_ratio * part_press
             / (tot_press - part_press)).to('dimensionless')
 
+#@jit(nopython=True)
+def mixing_ratio_no_units(part_press, tot_press, molecular_weight_ratio=mpconsts.epsilon_no_units):
+    return (molecular_weight_ratio * part_press
+            / (tot_press - part_press))
+
 
 @exporter.export
 @preprocess_xarray
@@ -851,6 +922,9 @@ def saturation_mixing_ratio(tot_press, temperature):
     """
     return mixing_ratio(saturation_vapor_pressure(temperature), tot_press)
 
+#@jit(nopython=True)
+def saturation_mixing_ratio_no_units(tot_press, temperature):
+    return mixing_ratio_no_units(saturation_vapor_pressure_no_units(temperature), tot_press)
 
 @exporter.export
 @preprocess_xarray
