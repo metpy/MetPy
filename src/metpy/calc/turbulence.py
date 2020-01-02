@@ -18,13 +18,13 @@ def get_perturbation(ts, axis=-1):
 
     Parameters
     ----------
-    ts : array_like
+    ts : array-like
          The time series from which you wish to find the perturbation
          time series (perturbation from the mean).
 
     Returns
     -------
-    array_like
+    array-like
         The perturbation time series.
 
     Other Parameters
@@ -56,14 +56,13 @@ def tke(u, v, w, perturbation=False, axis=-1):
 
     Parameters
     ----------
-    u : array_like
+    u : array-like
         The wind component along the x-axis
-    v : array_like
+    v : array-like
         The wind component along the y-axis
-    w : array_like
+    w : array-like
         The wind component along the z-axis
-
-    perturbation : {False, True}, optional
+    perturbation : bool, optional
                    True if the `u`, `v`, and `w` components of wind speed
                    supplied to the function are perturbation velocities.
                    If False, perturbation velocities will be calculated by
@@ -71,7 +70,7 @@ def tke(u, v, w, perturbation=False, axis=-1):
 
     Returns
     -------
-    array_like
+    array-like
         The corresponding turbulence kinetic energy value
 
     Other Parameters
@@ -123,10 +122,10 @@ def kinematic_flux(vel, b, perturbation=False, axis=-1):
 
     Parameters
     ----------
-    vel : array_like
+    vel : array-like
         A component of velocity
 
-    b : array_like
+    b : array-like
         May be a component of velocity or a scalar variable (e.g. Temperature)
 
     perturbation : bool, optional
@@ -135,7 +134,7 @@ def kinematic_flux(vel, b, perturbation=False, axis=-1):
 
     Returns
     -------
-    array_like
+    array-like
         The corresponding kinematic flux
 
     Other Parameters
@@ -191,14 +190,14 @@ def friction_velocity(u, w, v=None, perturbation=False, axis=-1):
 
     Parameters
     ----------
-    u : array_like
+    u : array-like
         The wind component along the x-axis
-    w : array_like
+    w : array-like
         The wind component along the z-axis
-    v : array_like, optional
+    v : array-like, optional
         The wind component along the y-axis.
 
-    perturbation : {False, True}, optional
+    perturbation : bool, optional
                    True if the `u`, `w`, and `v` components of wind speed
                    supplied to the function are perturbation velocities.
                    If False, perturbation velocities will be calculated by
@@ -206,7 +205,7 @@ def friction_velocity(u, w, v=None, perturbation=False, axis=-1):
 
     Returns
     -------
-    array_like
+    array-like
         The corresponding friction velocity
 
     Other Parameters

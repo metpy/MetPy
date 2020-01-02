@@ -569,7 +569,7 @@ def coriolis_parameter(latitude):
 
     Parameters
     ----------
-    latitude : array_like
+    latitude : array-like
         Latitude at each point
 
     Returns
@@ -648,7 +648,7 @@ def sigma_to_pressure(sigma, psfc, ptop):
 
     Parameters
     ----------
-    sigma : ndarray
+    sigma : numpy.ndarray
         The sigma levels to be converted to pressure levels.
 
     psfc : `pint.Quantity`
@@ -939,17 +939,17 @@ def altimeter_to_sea_level_pressure(altimeter_value, height, temperature):
 
     Parameters
     ----------
-    altimeter_value : 'pint.Quantity'
+    altimeter_value : `pint.Quantity`
         The altimeter setting value is defined by the METAR or other observation,
         with units of inches of mercury (in Hg) or millibars (hPa)
-    height  : 'pint.Quantity'
+    height  : `pint.Quantity`
         Elevation of the station measuring pressure. Often times measured in meters
-    temperature : 'pint.Quantity'
+    temperature : `pint.Quantity`
         Temperature at the station
 
     Returns
     -------
-    'pint.Quantity'
+    `pint.Quantity`
         The sea-level pressure in hPa and makes pressure values easier to compare
         between different stations
 

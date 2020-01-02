@@ -37,9 +37,9 @@ class StationPlot(object):
         ----------
         ax : matplotlib.axes.Axes
             The :class:`~matplotlib.axes.Axes` for plotting
-        x : array_like
+        x : array-like
             The x location of the stations in the plot
-        y : array_like
+        y : array-like
             The y location of the stations in the plot
         fontsize : int
             The fontsize to use for drawing text
@@ -84,7 +84,7 @@ class StationPlot(object):
             'C', 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', or 'NW'. Otherwise, should be a tuple
             specifying the number of increments in the x and y directions; increments
             are multiplied by `spacing` to give offsets in x and y relative to the center.
-        codes : array_like
+        codes : array-like
             The numeric values that should be converted to unicode characters for plotting.
         symbol_mapper : callable
             Controls converting data values to unicode code points for the
@@ -177,7 +177,7 @@ class StationPlot(object):
             'C', 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', or 'NW'. Otherwise, should be a tuple
             specifying the number of increments in the x and y directions; increments
             are multiplied by `spacing` to give offsets in x and y relative to the center.
-        parameter : array_like
+        parameter : array-like
             The numeric values that should be plotted
         formatter : str or callable, optional
             How to format the data as a string for plotting. If a string, it should be
@@ -213,7 +213,7 @@ class StationPlot(object):
             'C', 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', or 'NW'. Otherwise, should be a tuple
             specifying the number of increments in the x and y directions; increments
             are multiplied by `spacing` to give offsets in x and y relative to the center.
-        text : list (or array) of strings
+        text : array-like of strings
             The strings that should be plotted
         kwargs
             Additional keyword arguments to use for matplotlib's plotting functions.
@@ -247,7 +247,7 @@ class StationPlot(object):
             The data to use for the u-component of the barbs.
         v : array-like
             The data to use for the v-component of the barbs.
-        plot_units: `pint.unit`
+        plot_units: `pint.Unit`
             Units to plot in (performing conversion if necessary). Defaults to given units.
         kwargs
             Additional keyword arguments to pass to matplotlib's
@@ -419,7 +419,7 @@ class StationPlotLayout(dict):
             How to format the data as a string for plotting. If a string, it should be
             compatible with the :func:`format` builtin. If a callable, this should take a
             value and return a string. Defaults to '0.f'.
-        units : pint-compatible unit, optional
+        units : pint.Unit, optional
             The units to use for plotting. Data will be converted to this unit before
             conversion to a string. If not specified, no conversion is done.
         kwargs
@@ -513,7 +513,7 @@ class StationPlotLayout(dict):
         v_name : str
             The name of the parameter for the v-component for `barbs`, which is used as
             a key to pull data out of the data container passed to :meth:`plot`.
-        units : pint-compatible unit, optional
+        units : pint.Unit, optional
             The units to use for plotting. Data will be converted to this unit before
             conversion to a string. If not specified, no conversion is done.
         kwargs

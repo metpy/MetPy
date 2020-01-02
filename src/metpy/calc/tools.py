@@ -107,7 +107,7 @@ def find_intersections(x, a, b, direction='all', log_x=False):
         1-dimensional array of y-values for line 1
     b : array-like
         1-dimensional array of y-values for line 2
-    direction : string, optional
+    direction : str, optional
         specifies direction of crossing. 'all', 'increasing' (a becoming greater than b),
         or 'decreasing' (b becoming greater than a). Defaults to 'all'.
     log_x : bool, optional
@@ -748,12 +748,12 @@ def lat_lon_grid_deltas(longitude, latitude, **kwargs):
 
     Parameters
     ----------
-    longitude : array_like
+    longitude : array-like
         array of longitudes defining the grid
-    latitude : array_like
+    latitude : array-like
         array of latitudes defining the grid
     kwargs
-        Other keyword arguments to pass to :class:`~pyproj.Geod`
+        Other keyword arguments to pass to `~pyproj.Geod`
 
     Returns
     -------
@@ -1265,7 +1265,7 @@ def parse_angle(input_dir):
 
     Parameters
     ----------
-    input_dir : string or array-like
+    input_dir : str or array-like of strings
         Directional text such as west, [south-west, ne], etc
 
     Returns
@@ -1321,9 +1321,9 @@ def angle_to_direction(input_angle, full=False, level=3):
 
     Parameters
     ----------
-    input_angle : numeric or array-like numeric
+    input_angle : float or array-like
         Angles such as 0, 25, 45, 360, 410, etc
-    full : boolean
+    full : bool
         True returns full text (South), False returns abbrieviated text (S)
     level : int
         Level of detail (3 = N/NNE/NE/ENE/E... 2 = N/NE/E/SE... 1 = N/E/S/W)

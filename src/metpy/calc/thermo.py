@@ -1276,7 +1276,7 @@ def mixing_ratio_from_relative_humidity(relative_humidity, temperature, pressure
 
     Parameters
     ----------
-    relative_humidity: array_like
+    relative_humidity: array-like
         The relative humidity expressed as a unitless ratio in the range [0, 1]. Can also pass
         a percentage if proper units are attached.
     temperature: `pint.Quantity`
@@ -1666,12 +1666,23 @@ def isentropic_interpolation(theta_levels, pressure, temperature, *args, axis=0,
 
     Parameters
     ----------
-    theta_levels : array
+    theta_levels : array-like
         One-dimensional array of desired theta surfaces
-    pressure : array
+    pressure : array-like
         One-dimensional array of pressure levels
-    temperature : array
+    temperature : array-like
         Array of temperature
+    args : array-like, optional
+        Any additional variables will be interpolated to each isentropic level.
+
+    Returns
+    -------
+    list
+        List with pressure at each isentropic level, followed by each additional
+        argument interpolated to isentropic coordinates.
+
+    Other Parameters
+    ----------------
     axis : int, optional
         The axis corresponding to the vertical in the temperature array, defaults to 0.
     temperature_out : bool, optional
@@ -1684,7 +1695,7 @@ def isentropic_interpolation(theta_levels, pressure, temperature, *args, axis=0,
     bottom_up_search : bool, optional
         Controls whether to search for theta levels bottom-up, or top-down. Defaults to
         True, which is bottom-up search.
-    args : array, optional
+    args : array-like, optional
         Any additional variables will be interpolated to each isentropic level.
 
     Returns
@@ -2343,7 +2354,7 @@ def brunt_vaisala_period(heights, potential_temperature, axis=0):
     ----------
     heights : `pint.Quantity`
         One-dimensional profile of atmospheric height
-    potential_temperature : pint.Quantity`
+    potential_temperature : `pint.Quantity`
         Atmospheric potential temperature
     axis : int, optional
         The axis corresponding to vertical in the potential temperature array, defaults to 0.
