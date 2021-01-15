@@ -8,10 +8,12 @@ this allows reading files that are already in memory (using :class:`python:io.St
 or remote files (using :func:`~python:urllib.request.urlopen`).
 """
 
+from .gempak import *  # noqa: F403
 from .gini import *  # noqa: F403
 from .metar import *  # noqa: F403
 from .nexrad import *  # noqa: F403
 from .station_data import *  # noqa: F403
 
-__all__ = gini.__all__[:]  # pylint: disable=undefined-variable
+__all__ = gempak.__all__[:]  # pylint: disable=undefined-variable
+__all__.extend(gini.__all__)  # pylint: disable=undefined-variable
 __all__.extend(nexrad.__all__)  # pylint: disable=undefined-variable
