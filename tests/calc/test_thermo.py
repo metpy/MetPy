@@ -1104,7 +1104,6 @@ def test_isentropic_pressure_tmp_out_interp():
 
 def test_isentropic_pressure_data_bounds_error():
     """Test calculation of isentropic pressure function, error for data out of bounds."""
-    lev = [100000., 95000., 90000., 85000.] * units.Pa
     tmp = np.ones((4, 5, 5))
     tmp[0, :] = 296.
     tmp[1, :] = 292.
@@ -1113,6 +1112,7 @@ def test_isentropic_pressure_data_bounds_error():
     tmpk = tmp * units.kelvin
     isentlev = [296., 350.] * units.kelvin
     with pytest.raises(ValueError):
+        lev = [100000., 95000., 90000., 85000.] * units.Pa
         isentropic_interpolation(isentlev, lev, tmpk)
 
 
@@ -1564,10 +1564,10 @@ def test_dewpoint_specific_humidity():
 
 def test_dewpoint_specific_humidity_old_signature():
     """Test dewpoint from specific humidity using old signature issues specific error."""
-    p = 1013.25 * units.mbar
-    temperature = 20. * units.degC
-    q = 0.012 * units.dimensionless
     with pytest.raises(ValueError, match='changed in 1.0'):
+        p = 1013.25 * units.mbar
+        temperature = 20. * units.degC
+        q = 0.012 * units.dimensionless
         dewpoint_from_specific_humidity(q, temperature, p)
 
 

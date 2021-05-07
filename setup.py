@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 """Setup script for installing MetPy."""
 
+
 import sys
 
 from setuptools import setup
@@ -15,7 +16,10 @@ if sys.version_info[0] < 3:
     but it is no longer maintained.
 
     Python {py} detected.
-    """.format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+    """.format(
+        py='.'.join(str(v) for v in sys.version_info[:3])
+    )
+
 
     print(error)  # noqa: T001
     sys.exit(1)

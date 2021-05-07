@@ -243,7 +243,7 @@ def test_cross_section_error_on_missing_coordinate(test_ds_lonlat):
     # Use a variable with no crs coordinate
     data_bad = test_ds_lonlat['temperature'].copy()
     del data_bad['metpy_crs']
-    start, end = (30.5, 255.5), (44.5, 274.5)
-
     with pytest.raises(ValueError):
+        start, end = (30.5, 255.5), (44.5, 274.5)
+
         cross_section(data_bad, start, end)

@@ -66,7 +66,7 @@ def _read_master_text_file(input_file=None):
             lat = to_dec_deg(line[39:46].strip())
             lon = to_dec_deg(line[47:55].strip())
             alt_part = line[55:60].strip()
-            alt = int(alt_part if alt_part else 0.)
+            alt = int(alt_part or 0.)
             if stid:
                 if stid[0] in ('P', 'K'):
                     country = 'US'
@@ -110,16 +110,19 @@ def _read_airports_file(input_file=None):
     if input_file is None:
         input_file = get_test_data('airport-codes.csv', as_file_obj=False)
     df = pd.read_csv(input_file)
-    station_map = pd.DataFrame({'id': df.ident.values, 'synop_id': 99999,
-                                'latitude': df.latitude_deg.values,
-                                'longitude': df.longitude_deg.values,
-                                'altitude': units.Quantity(
-                                    df.elevation_ft.values, 'ft').to('m').m,
-                                'country': df.iso_region.str.split('-', n=1,
-                                                                   expand=True)[1].values,
-                                'source': input_file
-                                }).to_dict()
-    return station_map
+    return pd.DataFrame(
+        {
+            'id': df.ident.values,
+            'synop_id': 99999,
+            'latitude': df.latitude_deg.values,
+            'longitude': df.longitude_deg.values,
+            'altitude': units.Quantity(df.elevation_ft.values, 'ft').to('m').m,
+            'country': df.iso_region.str.split('-', n=1, expand=True)[
+                1
+            ].values,
+            'source': input_file,
+        }
+    ).to_dict()
 
 
 class StationLookup:

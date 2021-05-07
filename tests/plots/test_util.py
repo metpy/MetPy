@@ -126,8 +126,8 @@ def test_gempak_color_xw_image_compare():
 
 def test_gempak_color_invalid_style():
     """Test converting a GEMPAK color with an invalid style parameter."""
-    c = range(32)
     with pytest.raises(ValueError):
+        c = range(32)
         convert_gempak_color(c, style='plt')
 
 

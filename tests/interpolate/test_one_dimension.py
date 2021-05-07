@@ -125,9 +125,9 @@ def test_log_interpolate_set_nan_below():
     """Test interpolating with log x-scale setting out of bounds below data to nan."""
     x_log = np.array([1e3, 1e4, 1e5, 1e6])
     y_log = np.log(x_log) * 2 + 3
-    x_interp = 1e2
     y_interp_truth = np.nan
     with pytest.warns(Warning):
+        x_interp = 1e2
         y_interp = log_interpolate_1d(x_interp, x_log, y_log)
     assert_array_almost_equal(y_interp, y_interp_truth, 7)
 

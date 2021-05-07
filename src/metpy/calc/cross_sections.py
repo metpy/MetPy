@@ -80,16 +80,15 @@ def latitude_from_cross_section(cross):
     y = cross.metpy.y
     if check_axis(y, 'latitude'):
         return y
-    else:
-        from pyproj import Proj
-        latitude = Proj(cross.metpy.pyproj_crs)(
-            cross.metpy.x.values,
-            y.values,
-            inverse=True,
-            radians=False
-        )[1]
-        return xr.DataArray(units.Quantity(latitude, 'degrees_north'), coords=y.coords,
-                            dims=y.dims)
+    from pyproj import Proj
+    latitude = Proj(cross.metpy.pyproj_crs)(
+        cross.metpy.x.values,
+        y.values,
+        inverse=True,
+        radians=False
+    )[1]
+    return xr.DataArray(units.Quantity(latitude, 'degrees_north'), coords=y.coords,
+                        dims=y.dims)
 
 
 @exporter.export

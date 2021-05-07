@@ -139,7 +139,7 @@ ax.set_aspect('equal', 'datalim')
 dists = np.array([22.803508502, 7.21110255093, 31.304951685, 33.5410196625])
 values = np.array([0.064, 1.156, 3.364, 0.225])
 
-cres_weights = (radius * radius - dists * dists) / (radius * radius + dists * dists)
+cres_weights = (radius**2 - dists * dists) / (radius**2 + dists * dists)
 total_weights = np.sum(cres_weights)
 proportion = cres_weights / total_weights
 value = values * proportion

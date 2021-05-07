@@ -60,13 +60,13 @@ def is_dict_like(value):
 
 def either_dict_or_kwargs(pos_kwargs, kw_kwargs, func_name):
     """Ensure dict-like argument from either positional or keyword arguments."""
-    if pos_kwargs is not None:
-        if not is_dict_like(pos_kwargs):
-            raise ValueError('the first argument to .{} must be a '
-                             'dictionary'.format(func_name))
-        if kw_kwargs:
-            raise ValueError('cannot specify both keyword and positional arguments to '
-                             '.{}'.format(func_name))
-        return pos_kwargs
-    else:
+    if pos_kwargs is None:
         return kw_kwargs
+
+    if not is_dict_like(pos_kwargs):
+        raise ValueError('the first argument to .{} must be a '
+                         'dictionary'.format(func_name))
+    if kw_kwargs:
+        raise ValueError('cannot specify both keyword and positional arguments to '
+                         '.{}'.format(func_name))
+    return pos_kwargs
