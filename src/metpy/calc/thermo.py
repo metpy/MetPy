@@ -3290,3 +3290,71 @@ def gradient_richardson_number(height, potential_temperature, u, v, vertical_dim
     dvdz = first_derivative(v, x=height, axis=vertical_dim)
 
     return (mpconsts.g / potential_temperature) * (dthetadz / (dudz ** 2 + dvdz ** 2))
+
+
+@exporter.export
+@preprocess_and_wrap(
+    wrap_like='temp_bot',
+    broadcast=('temp_bot', 'temp_top')
+)
+@check_units('[temperature]', '[temperature]')
+def scale_height(temp_bot, temp_top):
+    r"""Calculate the scale height of a layer.
+
+    .. math::   H = \frac{R_d \overline{T}}{g}
+
+    This function assumes dry air, but can be used with the virtual temperature
+    to account for moisture.
+
+    Parameters
+    ----------
+    temp_bot : `pint.Quantity`
+        Temperature at bottom of layer
+
+    temp_top : `pint.Quantity`
+        Temperature at top of layer
+
+    Returns
+    -------
+    `pint.Quantity`
+        Scale height of layer
+    """
+    t_bar = 0.5 * (temp_bot.to('kelvin') + temp_top.to('kelvin'))
+
+    return (mpconsts.Rd * t_bar) / mpconsts.g
+
+
+@exporter.export
+@preprocess_and_wrap(
+    wrap_like='z_bot',
+    broadcast=('z_bot', 'pres_bot', 'pres_top', 'scale_height')
+)
+@check_units('[length]', '[pressure]', '[pressure]', '[length]')
+def hydrostatic_height(z_bot, pres_bot, pres_top, scale_height):
+    r"""Calculate the moist hydrostatic height.
+
+    .. math::   Z_2 = Z_1 + H \ln\left(\frac{p_1}{p_2}\right)
+
+    This function assumes dry air, but the moist hydrostatic height can
+    be obtained if the scale height is calculated with the virtual temperature.
+
+    Parameters
+    ----------
+    z_bot : `pint.Quantity`
+        Height at bottom of layer
+
+    pres_bot : `pint.Quantity`
+        Pressure at bottom of layer
+
+    pres_top : `pint.Quantity`
+        Pressure at top of layer
+
+    scale_height : `pint.Quantity`
+        Scale height of layer
+
+    Returns
+    -------
+    `pint.Quantity`
+        Hydrostatic height at top of layer
+    """
+    return z_bot + scale_height * np.log(pres_bot / pres_top)
